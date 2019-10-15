@@ -46,11 +46,11 @@ def readcap(filename):
                 src_to_dest.get(src).append(dest)
             else:
                 src_to_dest[src] = [dest]
-    pkts.close()
-return src_to_dest
+    return src_to_dest
 
 # Main
 dataFile = open("./AnalyticData/data.txt", "w")
+src_to_dest = readcap("test.pcap")
 dataFile.write(str(src_to_dest))
 
 printDict(src_to_dest)
