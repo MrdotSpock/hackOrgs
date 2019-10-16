@@ -51,10 +51,26 @@ def readcap(filename):
 # Main
 dataFile = open("./AnalyticData/data.txt", "w")
 src_to_dest = readcap("test.pcap")
-dataFile.write(str(src_to_dest))
-
-printDict(src_to_dest)
-print("###########")
-printDict(count(src_to_dest))
-
-
+print("Let us analyze your PCAP data")
+print("Tell us what you want to do:")
+while True:
+    print(
+        "[1] Load new PCAP file\n" +
+        "[2] Show traffic log\n" +
+        "[3] Match MAC address with a name\n" +
+        "[4] End"
+    )
+    usrChoice = input()
+    if usrChoice == '1':
+        print("What's the name of the file?")
+        readcap(input())
+        print("File loaded")
+    if usrChoice == '2':
+        printDict(count(src_to_dest))
+    if usrChoice == '3':
+        pass
+        ##### YET TO BE DONE #####
+    if usrChoice == '4':
+        exit()
+    print("Task finished.\n")
+    print("Do you want to do something else?")
