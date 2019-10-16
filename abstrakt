@@ -1,0 +1,2 @@
+V naší konfeře jsme se zabývali analýzou wifi. Naším cílem bylo ze záznamů paketů z orgovské wifi poznat, která adresa patří, kterému orgovi a podle toho, kdy org vysílá pakety určit, kdy org spí a kdy je vzhůru. K analýze paketů jsme použili program Wireshark a Python framework Scapy. 
+Naprogramovali jsme scripty, které umí filtrovat pakety a vykresovat grafy.Také jsme se pokusili přiřadit orgům jednotlivé MAC adresy a jak se nám to povedlo se dozvíte v naší prezentaci
