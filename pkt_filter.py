@@ -1,5 +1,5 @@
 ## File format:
-# SR:CM:AC:AD:DR:ES Optional comment, but the space after the MAC is required (because we are using str.split() in a wrong way, FIXME.
+# SR:CM:AC:AD:DR:ES (Optional comment, parentheses required (because we are using str.split() in a wrong way, FIXME.))
 # <TAB> DE:ST:MA:CA:DD:RE (Time.usec;length)
 import sys
 
@@ -47,35 +47,40 @@ class Log:
     def writeToFile(self, filename):
         fh = open(filename, "w")
         self.writeToFileHandle(fh)
-        close(fh)
+        fh.close()
     def writeToFileHandle(self, fh):
-        for src in items:
+        for src in self.items:
             # Do not print frames which do not have a source (e.g. acknowledgements)
             if src == None:
                 continue
-            if src in comments:
+            if src in self.comments:
                 fh.write("{} {}\n".format(src, comments[src]))
             else:
-                fh.write("{} \n".format(src))
-            for fd in items[src]:
+                fh.write("{} ()\n".format(src))
+            for fd in self.items[src]:
                 fh.write("\t{} ({}, {})\n".format(fd.dest, fd.time, fd.length))
             fh.write('\n')
     def addFromFile(self, filename):
         fh = open(filename, "r")
         self.addFromFileHandle(fh)
-        close(fh)
+        fh.close()
     def addFromFileHandle(self, fh):
         currentSrc = None
         while True: # FIXME: detect EOF in a sane way
             line = fh.readline()
+            if line == '':
+                # EOF
+                break
             if line.startswith('\t'):
                 # Add a record for the current source
                 dest, rest = line.split(" ", 1)
-                rest = rest.strip(['(', ')'])
+                rest = rest.strip('()\n')
                 time, length = rest.split(';', 1)
                 fd = FrameData()
                 fd.fromData(currentSrc, dest, float(time), int(length))
                 self.insert(fd)
+            elif line.startswith('\n'):
+                continue
             else:
                 # Only change the current Source and save optional comment
                 currentSrc, comment = line.split(' ', 1)
