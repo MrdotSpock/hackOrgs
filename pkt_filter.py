@@ -95,5 +95,3 @@ class Log:
                 if frdata.dest == destname:
                     result.insert(frdata)
         return result
-
-
