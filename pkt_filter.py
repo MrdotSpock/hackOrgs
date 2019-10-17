@@ -15,6 +15,75 @@ def frameToSrcDest(frame):
     else:
         src = dest = None
     return (src, dest)
+
+
+
+class FrameData:
+    def fromFrame(self, frame):
+        self.src, self.dest = frameToSrcDest(frame)
+        self.time = frame.time
+        self.length = len(frame)
+    def fromData(self, src, dest, time, length):
+        self.src = src
+        self.dest = dest
+        self.time = time
+        self.length = length
+
+class Log:
+    items = dict()      # Indexed by source, contains lists of FrameData's
+    comments = dict()   # Indexed by source, contains strings of comments
+    def insertFrame(self, frame):
+        fd = FrameData()
+        fd.fromFrame(frame)
+        self.insert(fd)
+    def insert(self, framedata):
+        # TODO: Check, that we do not already have the frame logged
+        # - Assume that one device could not send multiple frames to the same other device in the same milisecond
+        if framedata.src not in self.items:
+            self.items[framedata.src] = []
+        self.items[framedata.src].append(framedata)
+    def print(self):
+        self.writeToFileHandle(sys.stdout)
+    def writeToFile(self, filename):
+        fh = open(filename, "w")
+        self.writeToFileHandle(fh)
+        close(fh)
+    def writeToFileHandle(self, fh):
+        for src in items:
+            # Do not print frames which do not have a source (e.g. acknowledgements)
+            if src == None:
+                continue
+            if src in comments:
+                fh.write("{} {}\n".format(src, comments[src]))
+            else:
+                fh.write("{} \n".format(src))
+            for fd in items[src]:
+                fh.write("\t{} ({}, {})\n".format(fd.dest, fd.time, fd.length))
+            fh.write('\n')
+    def addFromFile(self, filename):
+        fh = open(filename, "r")
+        self.addFromFileHandle(fh)
+        close(fh)
+    def addFromFileHandle(self, fh):
+        currentSrc = None
+        while True: # FIXME: detect EOF in a sane way
+            line = fh.readline()
+            if line.startswith('\t'):
+                # Add a record for the current source
+                dest, rest = line.split(" ", 1)
+                rest = rest.strip(['(', ')'])
+                time, length = rest.split(';', 1)
+                fd = FrameData()
+                fd.fromData(currentSrc, dest, float(time), int(length))
+                self.insert(fd)
+            else:
+                # Only change the current Source and save optional comment
+                currentSrc, comment = line.split(' ', 1)
+                if comment != '':
+                    self.comments[currentSrc] = comment
+    def addFromPcap(self, filename):
+        sniff(offline=filename, store=False, prn=self.insertFrame)
+
 # Functions
 def printDict(dictionary):
     for src in dictionary.keys():
