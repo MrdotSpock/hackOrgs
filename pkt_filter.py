@@ -1,3 +1,20 @@
+## File format:
+# SR:CM:AC:AD:DR:ES Optional comment, but the space after the MAC is required (because we are using str.split() in a wrong way, FIXME.
+# <TAB> DE:ST:MA:CA:DD:RE (Time.usec;length)
+import sys
+
+def frameToSrcDest(frame):
+    if frame[Dot11].type != 2 or frame[Dot11].subtype != 8:
+        return (None, None)         # We need to return a tuple, else we break asignments in the program.
+    if frame[Dot11].FCfield & 0x1:    #From device to router
+        src = frame[Dot11].addr1
+        dest = frame[Dot11].addr3
+    elif frame[Dot11].FCfield & 0x2:    #From router to device
+        src = frame[Dot11].addr3
+        dest = frame[Dot11].addr1
+    else:
+        src = dest = None
+    return (src, dest)
 # Functions
 def printDict(dictionary):
     for src in dictionary.keys():
@@ -32,16 +49,7 @@ def readcap(filename):
 
     for pkt in pkts:
         if pkt[Dot11].type == 2 and pkt[Dot11].subtype == 8:
-            src = ""
-            dest = ""
-
-            if pkt[Dot11].FCfield & 0x1:    #From device to router
-                src = pkt[Dot11].addr1
-                dest = pkt[Dot11].addr3
-            elif pkt[Dot11].FCfield & 0x2:    #From router to device
-                src = pkt[Dot11].addr3
-                dest = pkt[Dot11].addr1
-
+            src, dest = frameToSrcDest(pkt)
             if src in src_to_dest:
                 src_to_dest.get(src).append(dest)
             else:
