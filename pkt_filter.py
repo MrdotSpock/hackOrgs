@@ -88,3 +88,12 @@ class Log:
                     self.comments[currentSrc] = comment
     def addFromPcap(self, filename):
         sniff(offline=filename, store=False, prn=self.insertFrame)
+    def filterByDest(self, destname):
+        result = Log()
+        for src in self.items:
+            for frdata in self.items[src]:
+                if frdata.dest == destname:
+                    result.insert(frdata)
+        return result
+
+
